@@ -125,16 +125,6 @@ docker-compose logs -f
 docker-compose logs -f jira-713
 ```
 
-### Restart Specific Service
-```bash
-docker-compose restart jira-713
-```
-
-### Scale Down (for development)
-```bash
-# Run only specific versions
-docker-compose up -d jira-713 jira-850
-```
 
 ## JAR Extraction Tool
 
@@ -182,34 +172,3 @@ Test database connections:
 ```bash
 docker exec -it pg-713 psql -U jira -d jira713
 ```
-
-## Use Cases
-
-This lab environment is ideal for:
-
-- **Version Migration Testing**: Test upgrade paths between Jira versions
-- **Plugin Compatibility**: Verify plugin compatibility across versions
-- **Performance Testing**: Compare performance characteristics
-- **Development**: Develop and test against multiple Jira versions
-- **Training**: Provide hands-on experience with different versions
-- **Security Testing**: Test security configurations across versions
-
-## Security Notes
-
-- Default credentials are used for demonstration purposes
-- Do not use in production without proper security hardening
-- Consider changing default passwords for extended use
-- Network isolation is provided through Docker networking
-
-## Contributing
-
-To add new Jira versions or modify configurations:
-
-1. Add new service definitions to `docker-compose.yml`
-2. Update the `dump-jars.sh` script if needed
-3. Test the new configuration thoroughly
-4. Update this README with new information
-
-## License
-
-This project is provided as-is for educational and development purposes.
