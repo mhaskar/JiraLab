@@ -1,0 +1,225 @@
+version: "3.9"
+
+networks:
+  traefik:
+    name: traefik
+    driver: bridge
+
+services:
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik-jira-lab
+    command:
+      - --api.dashboard=true
+      - --entrypoints.web.address=:80
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+    ports:
+      - "80:80"
+      - "8080:8080" # dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - traefik
+
+  # ======= Jira 7.13.x (7.13.18) =======
+  pg-713:
+    image: postgres:10-alpine
+    container_name: pg-713
+    environment:
+      POSTGRES_DB: jira713
+      POSTGRES_USER: jira
+      POSTGRES_PASSWORD: jira
+    volumes:
+      - pgdata_713:/var/lib/postgresql/data
+    networks:
+      - traefik
+
+  jira-713:
+    image: atlassian/jira-software:7.13.18
+    container_name: jira-713
+    depends_on:
+      - pg-713
+    environment:
+      JVM_MINIMUM_MEMORY: 1024m
+      JVM_MAXIMUM_MEMORY: 2048m
+      ATL_DB_TYPE: postgresql
+      ATL_JDBC_URL: jdbc:postgresql://pg-713:5432/jira713
+      ATL_JDBC_USER: jira
+      ATL_JDBC_PASSWORD: jira
+      ATL_TOMCAT_SCHEME: http
+      ATL_TOMCAT_PROXYNAME: jira-7-13.jira-lab.local
+      ATL_TOMCAT_PROXYPORT: "80"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.jira713.rule=Host(`jira-7-13.jira-lab.local`)
+      - traefik.http.routers.jira713.entrypoints=web
+      - traefik.http.services.jira713.loadbalancer.server.port=8080
+    volumes:
+      - jira_data_713:/var/atlassian/application-data/jira
+    networks:
+      - traefik
+
+  # ======= Jira 8.5.0 =======
+  pg-850:
+    image: postgres:12-alpine
+    container_name: pg-850
+    environment:
+      POSTGRES_DB: jira850
+      POSTGRES_USER: jira
+      POSTGRES_PASSWORD: jira
+    volumes:
+      - pgdata_850:/var/lib/postgresql/data
+    networks:
+      - traefik
+
+  jira-850:
+    image: atlassian/jira-software:8.5.0
+    container_name: jira-850
+    depends_on:
+      - pg-850
+    environment:
+      JVM_MINIMUM_MEMORY: 1024m
+      JVM_MAXIMUM_MEMORY: 3072m
+      ATL_DB_TYPE: postgresql
+      ATL_JDBC_URL: jdbc:postgresql://pg-850:5432/jira850
+      ATL_JDBC_USER: jira
+      ATL_JDBC_PASSWORD: jira
+      ATL_TOMCAT_SCHEME: http
+      ATL_TOMCAT_PROXYNAME: jira-8-5.jira-lab.local
+      ATL_TOMCAT_PROXYPORT: "80"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.jira850.rule=Host(`jira-8-5.jira-lab.local`)
+      - traefik.http.routers.jira850.entrypoints=web
+      - traefik.http.services.jira850.loadbalancer.server.port=8080
+    volumes:
+      - jira_data_850:/var/atlassian/application-data/jira
+    networks:
+      - traefik
+
+  # ======= Jira 8.13.x (8.13.22) =======
+  pg-813:
+    image: postgres:12-alpine
+    container_name: pg-813
+    environment:
+      POSTGRES_DB: jira813
+      POSTGRES_USER: jira
+      POSTGRES_PASSWORD: jira
+    volumes:
+      - pgdata_813:/var/lib/postgresql/data
+    networks:
+      - traefik
+
+  jira-813:
+    image: atlassian/jira-software:8.13.22
+    container_name: jira-813
+    depends_on:
+      - pg-813
+    environment:
+      JVM_MINIMUM_MEMORY: 1024m
+      JVM_MAXIMUM_MEMORY: 3072m
+      ATL_DB_TYPE: postgresql
+      ATL_JDBC_URL: jdbc:postgresql://pg-813:5432/jira813
+      ATL_JDBC_USER: jira
+      ATL_JDBC_PASSWORD: jira
+      ATL_TOMCAT_SCHEME: http
+      ATL_TOMCAT_PROXYNAME: jira-8-13.jira-lab.local
+      ATL_TOMCAT_PROXYPORT: "80"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.jira813.rule=Host(`jira-8-13.jira-lab.local`)
+      - traefik.http.routers.jira813.entrypoints=web
+      - traefik.http.services.jira813.loadbalancer.server.port=8080
+    volumes:
+      - jira_data_813:/var/atlassian/application-data/jira
+    networks:
+      - traefik
+
+  # ======= Jira 9.4.x (9.4.21) =======
+  pg-94:
+    image: postgres:15-alpine
+    container_name: pg-94
+    environment:
+      POSTGRES_DB: jira94
+      POSTGRES_USER: jira
+      POSTGRES_PASSWORD: jira
+    volumes:
+      - pgdata_94:/var/lib/postgresql/data
+    networks:
+      - traefik
+
+  jira-94:
+    image: atlassian/jira-software:9.4.21
+    container_name: jira-94
+    depends_on:
+      - pg-94
+    environment:
+      JVM_MINIMUM_MEMORY: 1024m
+      JVM_MAXIMUM_MEMORY: 4096m
+      ATL_DB_TYPE: postgresql
+      ATL_JDBC_URL: jdbc:postgresql://pg-94:5432/jira94
+      ATL_JDBC_USER: jira
+      ATL_JDBC_PASSWORD: jira
+      ATL_TOMCAT_SCHEME: http
+      ATL_TOMCAT_PROXYNAME: jira-9-4.jira-lab.local
+      ATL_TOMCAT_PROXYPORT: "80"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.jira94.rule=Host(`jira-9-4.jira-lab.local`)
+      - traefik.http.routers.jira94.entrypoints=web
+      - traefik.http.services.jira94.loadbalancer.server.port=8080
+    volumes:
+      - jira_data_94:/var/atlassian/application-data/jira
+    networks:
+      - traefik
+
+  # ======= Jira 9.12.x (9.12.10) =======
+  pg-912:
+    image: postgres:15-alpine
+    container_name: pg-912
+    environment:
+      POSTGRES_DB: jira912
+      POSTGRES_USER: jira
+      POSTGRES_PASSWORD: jira
+    volumes:
+      - pgdata_912:/var/lib/postgresql/data
+    networks:
+      - traefik
+
+  jira-912:
+    image: atlassian/jira-software:9.12.10
+    container_name: jira-912
+    depends_on:
+      - pg-912
+    environment:
+      JVM_MINIMUM_MEMORY: 1024m
+      JVM_MAXIMUM_MEMORY: 4096m
+      ATL_DB_TYPE: postgresql
+      ATL_JDBC_URL: jdbc:postgresql://pg-912:5432/jira912
+      ATL_JDBC_USER: jira
+      ATL_JDBC_PASSWORD: jira
+      ATL_TOMCAT_SCHEME: http
+      ATL_TOMCAT_PROXYNAME: jira-9-12.jira-lab.local
+      ATL_TOMCAT_PROXYPORT: "80"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.jira912.rule=Host(`jira-9-12.jira-lab.local`)
+      - traefik.http.routers.jira912.entrypoints=web
+      - traefik.http.services.jira912.loadbalancer.server.port=8080
+    volumes:
+      - jira_data_912:/var/atlassian/application-data/jira
+    networks:
+      - traefik
+
+volumes:
+  jira_data_713:
+  jira_data_850:
+  jira_data_813:
+  jira_data_94:
+  jira_data_912:
+  pgdata_713:
+  pgdata_850:
+  pgdata_813:
+  pgdata_94:
+  pgdata_912:
